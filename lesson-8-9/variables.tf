@@ -195,3 +195,176 @@ variable "tags" {
     ManagedBy   = "Terraform"
   }
 }
+
+# RDS/Database Variables
+variable "rds_identifier" {
+  description = "Identifier for the database"
+  type        = string
+  default     = "lesson-db-postgres"
+}
+
+variable "rds_use_aurora" {
+  description = "Whether to create Aurora cluster (true) or standard RDS (false)"
+  type        = bool
+  default     = false
+}
+
+variable "rds_engine" {
+  description = "Database engine (postgres, mysql, aurora-postgresql, aurora-mysql)"
+  type        = string
+  default     = "postgres"
+}
+
+variable "rds_engine_version" {
+  description = "Database engine version"
+  type        = string
+  default     = "16.1"
+}
+
+variable "rds_instance_class" {
+  description = "Instance class for database"
+  type        = string
+  default     = "db.t3.micro"
+}
+
+variable "rds_allocated_storage" {
+  description = "Allocated storage in GB (only for standard RDS)"
+  type        = number
+  default     = 20
+}
+
+variable "rds_storage_type" {
+  description = "Storage type (gp2, gp3, io1)"
+  type        = string
+  default     = "gp3"
+}
+
+variable "rds_storage_encrypted" {
+  description = "Enable storage encryption"
+  type        = bool
+  default     = true
+}
+
+variable "rds_database_name" {
+  description = "Name of the database to create"
+  type        = string
+  default     = "djangodb"
+}
+
+variable "rds_master_username" {
+  description = "Master username for the database"
+  type        = string
+  default     = "dbadmin"
+}
+
+variable "rds_master_password" {
+  description = "Master password for the database"
+  type        = string
+  sensitive   = true
+}
+
+variable "rds_port" {
+  description = "Port for database connections"
+  type        = number
+  default     = 5432
+}
+
+variable "rds_allowed_cidr_blocks" {
+  description = "CIDR blocks allowed to access the database"
+  type        = list(string)
+  default     = []
+}
+
+variable "rds_allowed_security_group_ids" {
+  description = "Security group IDs allowed to access the database"
+  type        = list(string)
+  default     = []
+}
+
+variable "rds_publicly_accessible" {
+  description = "Whether the database is publicly accessible"
+  type        = bool
+  default     = false
+}
+
+variable "rds_multi_az" {
+  description = "Enable Multi-AZ deployment (standard RDS only)"
+  type        = bool
+  default     = false
+}
+
+variable "rds_backup_retention_period" {
+  description = "Number of days to retain backups"
+  type        = number
+  default     = 7
+}
+
+variable "rds_backup_window" {
+  description = "Preferred backup window (UTC)"
+  type        = string
+  default     = "03:00-04:00"
+}
+
+variable "rds_maintenance_window" {
+  description = "Preferred maintenance window (UTC)"
+  type        = string
+  default     = "sun:04:00-sun:05:00"
+}
+
+variable "rds_skip_final_snapshot" {
+  description = "Skip final snapshot when destroying"
+  type        = bool
+  default     = true
+}
+
+variable "rds_deletion_protection" {
+  description = "Enable deletion protection"
+  type        = bool
+  default     = false
+}
+
+variable "rds_performance_insights_enabled" {
+  description = "Enable Performance Insights"
+  type        = bool
+  default     = false
+}
+
+variable "rds_enabled_cloudwatch_logs_exports" {
+  description = "List of log types to export to CloudWatch"
+  type        = list(string)
+  default     = ["postgresql"]
+}
+
+variable "rds_aurora_cluster_instances" {
+  description = "Number of Aurora cluster instances (Aurora only)"
+  type        = number
+  default     = 2
+}
+
+variable "rds_aurora_autoscaling_enabled" {
+  description = "Enable autoscaling for Aurora read replicas"
+  type        = bool
+  default     = false
+}
+
+variable "rds_aurora_autoscaling_min_capacity" {
+  description = "Minimum number of Aurora read replicas"
+  type        = number
+  default     = 1
+}
+
+variable "rds_aurora_autoscaling_max_capacity" {
+  description = "Maximum number of Aurora read replicas"
+  type        = number
+  default     = 5
+}
+
+variable "rds_db_parameters" {
+  description = "Custom database parameters"
+  type = list(object({
+    name  = string
+    value = string
+  }))
+  default = []
+}
+

@@ -98,3 +98,57 @@ output "get_argocd_loadbalancer_command" {
   description = "Command to get Argo CD LoadBalancer URL"
   value       = "kubectl get svc argocd-server -n ${module.argocd.argocd_namespace} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'"
 }
+
+# RDS/Database Outputs
+output "db_endpoint" {
+  description = "Database connection endpoint"
+  value       = module.rds.endpoint
+}
+
+output "db_reader_endpoint" {
+  description = "Database reader endpoint (Aurora only)"
+  value       = module.rds.reader_endpoint
+}
+
+output "db_port" {
+  description = "Database port"
+  value       = module.rds.port
+}
+
+output "db_name" {
+  description = "Database name"
+  value       = module.rds.database_name
+}
+
+output "db_username" {
+  description = "Database master username"
+  value       = module.rds.master_username
+  sensitive   = true
+}
+
+output "db_engine" {
+  description = "Database engine"
+  value       = module.rds.engine
+}
+
+output "db_engine_version" {
+  description = "Database engine version"
+  value       = module.rds.engine_version
+}
+
+output "db_is_aurora" {
+  description = "Whether this is an Aurora cluster"
+  value       = module.rds.is_aurora
+}
+
+output "db_security_group_id" {
+  description = "Database security group ID"
+  value       = module.rds.security_group_id
+}
+
+output "db_connection_string" {
+  description = "Database connection string (for reference)"
+  value       = "postgresql://${module.rds.master_username}:PASSWORD@${module.rds.endpoint}/${module.rds.database_name}"
+  sensitive   = true
+}
+

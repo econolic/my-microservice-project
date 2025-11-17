@@ -152,3 +152,56 @@ module "argocd" {
 
   depends_on = [module.eks, module.jenkins]
 }
+
+# RDS Database Module
+# Example 1: Standard RDS PostgreSQL instance
+module "rds" {
+  source = "./modules/rds"
+
+  identifier   = var.rds_identifier
+  use_aurora   = var.rds_use_aurora
+  engine       = var.rds_engine
+  engine_version = var.rds_engine_version
+  instance_class = var.rds_instance_class
+
+  # Storage (only for standard RDS)
+  allocated_storage = var.rds_allocated_storage
+  storage_type      = var.rds_storage_type
+  storage_encrypted = var.rds_storage_encrypted
+
+  # Database configuration
+  database_name   = var.rds_database_name
+  master_username = var.rds_master_username
+  master_password = var.rds_master_password
+  port            = var.rds_port
+
+  # Network configuration
+  vpc_id                       = module.vpc.vpc_id
+  subnet_ids                   = module.vpc.private_subnet_ids
+  allowed_cidr_blocks          = var.rds_allowed_cidr_blocks
+  allowed_security_group_ids   = var.rds_allowed_security_group_ids
+  publicly_accessible          = var.rds_publicly_accessible
+  multi_az                     = var.rds_multi_az
+
+  # Backup configuration
+  backup_retention_period = var.rds_backup_retention_period
+  backup_window           = var.rds_backup_window
+  maintenance_window      = var.rds_maintenance_window
+  skip_final_snapshot     = var.rds_skip_final_snapshot
+  deletion_protection     = var.rds_deletion_protection
+
+  # Monitoring
+  performance_insights_enabled = var.rds_performance_insights_enabled
+  enabled_cloudwatch_logs_exports = var.rds_enabled_cloudwatch_logs_exports
+
+  # Aurora-specific (only used when use_aurora = true)
+  aurora_cluster_instances = var.rds_aurora_cluster_instances
+  aurora_autoscaling_enabled = var.rds_aurora_autoscaling_enabled
+  aurora_autoscaling_min_capacity = var.rds_aurora_autoscaling_min_capacity
+  aurora_autoscaling_max_capacity = var.rds_aurora_autoscaling_max_capacity
+
+  # Custom database parameters
+  db_parameters = var.rds_db_parameters
+
+  tags = var.tags
+}
