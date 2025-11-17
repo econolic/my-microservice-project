@@ -6,6 +6,7 @@ terraform.tfstate.backup
 *.tfstate
 *.tfstate.*
 tfplan
+*.tfplan
 tfplan.json
 
 # Sensitive files
