@@ -1,0 +1,53 @@
+# AWS Configuration
+aws_region = "us-west-2"
+
+# S3 Backend Configuration
+backend_bucket_name = "terraform-state-budyakov-lesson8-9"
+backend_table_name  = "terraform-locks-lesson8-9"
+
+# VPC Configuration
+vpc_name               = "lesson-8-9-vpc"
+vpc_cidr               = "10.0.0.0/16"
+availability_zones     = ["us-west-2a", "us-west-2b", "us-west-2c"]
+public_subnet_cidrs    = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+private_subnet_cidrs   = ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"]
+
+# ECR Configuration
+ecr_repository_name = "django-app-lesson8-9"
+
+# EKS Configuration
+cluster_name        = "lesson-8-9-eks-cluster"
+cluster_version     = "1.28"
+node_group_name     = "lesson-8-9-node-group"
+node_instance_types = ["t3.medium"]
+node_min_size       = 2
+node_desired_size   = 2
+node_max_size       = 4
+
+# Jenkins Configuration
+jenkins_namespace       = "jenkins"
+jenkins_chart_version   = "5.7.0"
+jenkins_admin_password  = "Admin123!"  # Change this to a secure password
+jenkins_service_type    = "LoadBalancer"
+jenkins_storage_size    = "10Gi"
+
+# Argo CD Configuration
+argocd_namespace     = "argocd"
+argocd_chart_version = "7.7.1"
+argocd_service_type  = "LoadBalancer"
+argocd_auto_sync     = true
+argocd_self_heal     = true
+
+# GitHub Configuration
+github_token    = "ghp_your_github_token_here"  # Replace with your GitHub token
+github_username = "your-github-username"         # Replace with your GitHub username
+github_repo_url = "https://github.com/your-github-username/my-microservice-project.git"  # Replace with your repo URL
+helm_chart_path = "charts/django-app"
+
+# Common Tags
+tags = {
+  Project     = "MyMicroservice"
+  Lesson      = "8-9"
+  Environment = "development"
+  ManagedBy   = "Terraform"
+}
