@@ -1,0 +1,121 @@
+controller:
+  # Admin user configuration
+  admin:
+    password: "${admin_password}"
+
+  # Resource limits (reduced to fit small nodes)
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "384Mi"
+    limits:
+      cpu: "500m"
+      memory: "768Mi"
+
+  # Reduce init container resource requests
+  initContainerResources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "300m"
+      memory: "768Mi"
+
+  # Explicit JVM opts for init plugin manager
+  initContainerEnv:
+    - name: JAVA_OPTS
+      value: "-Xms128m -Xmx384m"
+    - name: JAVA_TOOL_OPTIONS
+      value: "-Xms128m -Xmx384m"
+
+  # Reduce sidecar (config-reloader) resources
+  sidecars:
+    configAutoReload:
+      resources:
+        requests:
+          cpu: "50m"
+          memory: "64Mi"
+        limits:
+          cpu: "100m"
+          memory: "128Mi"
+  
+  # Service configuration
+  serviceType: "${service_type}"
+  
+  # Install suggested plugins
+  installLatestPlugins: false
+  # Use chart 5.8.110 default plugin versions (compatible with Jenkins 2.528.2-jdk21)
+  installPlugins: []
+
+  # Constrain JVM heap for low-memory node
+  javaOpts: "-Xms128m -Xmx256m"
+  
+  # Jenkins Configuration as Code (JCasC)
+  JCasC:
+    defaultConfig: true
+    configScripts:
+      welcome-message: |
+        jenkins:
+          systemMessage: "Jenkins configured automatically by Terraform and Helm"
+      
+      github-config: |
+        unclassified:
+          gitHubPluginConfig:
+            configs:
+              - name: "GitHub"
+                credentialsId: "github-token"
+      
+      kaniko-pod-template: |
+        jenkins:
+          clouds:
+            - kubernetes:
+                name: "kubernetes"
+                serverUrl: "https://kubernetes.default"
+                namespace: "jenkins"
+                jenkinsUrl: "http://jenkins:8080"
+                jenkinsTunnel: "jenkins-agent:50000"
+                templates:
+                  - name: "kaniko"
+                    namespace: "jenkins"
+                    label: "kaniko"
+                    nodeUsageMode: NORMAL
+                    containers:
+                      - name: "kaniko"
+                        image: "gcr.io/kaniko-project/executor:debug"
+                        command: "/busybox/cat"
+                        ttyEnabled: true
+                        privileged: false
+                        resourceRequestCpu: "500m"
+                        resourceRequestMemory: "1Gi"
+                        resourceLimitCpu: "1000m"
+                        resourceLimitMemory: "2Gi"
+                      - name: "git"
+                        image: "alpine/git:latest"
+                        command: "/bin/sh -c"
+                        args: "cat"
+                        ttyEnabled: true
+                    volumes:
+                      - emptyDirVolume:
+                          memory: false
+                          mountPath: "/workspace"
+                    yaml: |
+                      spec:
+                        serviceAccountName: jenkins
+  
+  # Security settings
+  numExecutors: 0
+  
+persistence:
+  enabled: false
+  size: "${storage_size}"
+  storageClass: "gp2"
+
+serviceAccount:
+  create: true
+  name: jenkins
+  annotations:
+    eks.amazonaws.com/role-arn: ""
+
+rbac:
+  create: true
+  readSecrets: true

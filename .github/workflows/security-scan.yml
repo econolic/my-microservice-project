@@ -1,0 +1,115 @@
+name: Security Scanning
+
+on:
+  push:
+    branches: [ main, final-project, lesson-* ]
+  pull_request:
+    branches: [ main, final-project ]
+  workflow_dispatch:
+
+jobs:
+  terraform-security:
+    name: Terraform Security Scan (tfsec)
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Run tfsec
+      uses: aquasecurity/tfsec-action@v1.0.3
+      with:
+        soft_fail: false
+        format: sarif
+        additional_args: --minimum-severity MEDIUM
+        
+    - name: Upload tfsec results to GitHub Security
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: tfsec.sarif
+
+  dockerfile-security:
+    name: Dockerfile Security Scan (Trivy)
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Run Trivy vulnerability scanner on Dockerfile
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'config'
+        scan-ref: 'Django/Dockerfile'
+        format: 'sarif'
+        output: 'trivy-dockerfile.sarif'
+        severity: 'CRITICAL,HIGH,MEDIUM'
+        
+    - name: Upload Trivy results to GitHub Security
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: trivy-dockerfile.sarif
+
+  secrets-scan:
+    name: Secrets Scan (GitLeaks)
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Run Gitleaks
+      uses: gitleaks/gitleaks-action@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  dependency-scan:
+    name: Python Dependencies Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        pip install safety pip-audit
+        
+    - name: Run Safety check
+      run: |
+        safety check -r requirements.txt --output json || true
+        
+    - name: Run pip-audit
+      run: |
+        pip-audit -r requirements.txt || true
+
+  terraform-validation:
+    name: Terraform Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.6.0
+        
+    - name: Terraform Format Check
+      run: terraform fmt -check -recursive
+      
+    - name: Terraform Init
+      run: terraform init -backend=false
+      
+    - name: Terraform Validate
+      run: terraform validate

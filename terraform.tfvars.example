@@ -1,0 +1,74 @@
+# AWS Configuration
+aws_region = "us-west-2"
+
+# S3 Backend Configuration
+backend_bucket_name = "terraform-state-budyakov-final-project"
+backend_table_name  = "terraform-locks-final-project"
+
+# VPC Configuration
+vpc_name               = "final-project-vpc"
+vpc_cidr               = "10.0.0.0/16"
+availability_zones     = ["us-west-2a", "us-west-2b", "us-west-2c"]
+public_subnet_cidrs    = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+private_subnet_cidrs   = ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"]
+
+# ECR Configuration
+ecr_repository_name = "django-app-final-project"
+
+# EKS Configuration
+cluster_name        = "final-project-eks-cluster"
+cluster_version     = "1.28"
+node_group_name     = "final-project-node-group"
+node_instance_types = ["t3.small"]
+node_min_size       = 1
+node_desired_size   = 1
+node_max_size       = 2
+ebs_csi_driver_version = "v1.25.0-eksbuild.1"
+
+# RDS Database Configuration
+rds_identifier      = "final-project-postgres"
+rds_use_aurora      = false
+rds_engine          = "postgres"
+rds_engine_version  = "16.1"
+rds_instance_class  = "db.t3.micro"
+rds_allocated_storage = 20
+rds_storage_type      = "gp3"
+rds_storage_encrypted = true
+rds_database_name   = "djangodb"
+rds_master_username = "dbadmin"
+rds_port            = 5432
+rds_allowed_cidr_blocks = ["10.0.0.0/16"]
+rds_publicly_accessible = false
+rds_multi_az        = false
+rds_backup_retention_period = 7
+rds_skip_final_snapshot = true
+rds_deletion_protection = false
+rds_performance_insights_enabled = false
+rds_enabled_cloudwatch_logs_exports = ["postgresql"]
+
+# Jenkins Configuration
+jenkins_namespace       = "jenkins"
+jenkins_chart_version   = "5.8.110"
+jenkins_service_type    = "LoadBalancer"
+jenkins_storage_size    = "5Gi"
+
+# Argo CD Configuration
+argocd_namespace     = "argocd"
+argocd_chart_version = "7.7.1"
+argocd_service_type  = "LoadBalancer"
+argocd_auto_sync     = true
+argocd_self_heal     = true
+helm_chart_path      = "charts/django-app"
+
+# Monitoring Configuration
+monitoring_namespace     = "monitoring"
+monitoring_chart_version = "65.0.0"
+monitoring_service_type  = "LoadBalancer"
+
+# Common Tags
+tags = {
+  Project     = "FinalProject"
+  Environment = "production"
+  ManagedBy   = "Terraform"
+  Course      = "DevOps"
+}

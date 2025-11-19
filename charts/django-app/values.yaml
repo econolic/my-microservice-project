@@ -1,0 +1,107 @@
+# Default values for django-app
+replicaCount: 2
+
+image:
+  repository: 978045176156.dkr.ecr.us-west-2.amazonaws.com/django-app-final-project
+  pullPolicy: Always
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsNonRoot: false
+  runAsUser: 0
+
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: false
+  allowPrivilegeEscalation: false
+
+service:
+  type: LoadBalancer
+  port: 80
+  targetPort: 8000
+  annotations: {}
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Django application configuration
+django:
+  # Database configuration
+  # IMPORTANT: After deploying with Terraform, update 'host' with actual RDS endpoint
+  # Get endpoint with: terraform output db_endpoint
+  database:
+    name: djangodb
+    user: dbadmin
+    password: SecureDbPassword123!  # Match terraform.tfvars rds_master_password
+    host: "REPLACE_WITH_RDS_ENDPOINT"  # Update after terraform apply
+    port: "5432"
+  
+  # Django settings
+  debug: "False"
+  secretKey: "change-this-to-a-secure-random-secret-key-in-production"
+  allowedHosts: "*"
+  
+  # Static files
+  staticUrl: "/static/"
+  staticRoot: "/app/staticfiles"
+
+# Health checks
+livenessProbe:
+  httpGet:
+    path: /
+    port: 8000
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: 8000
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3

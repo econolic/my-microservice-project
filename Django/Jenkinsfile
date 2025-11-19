@@ -1,0 +1,175 @@
+pipeline {
+    agent {
+        kubernetes {
+            label 'kaniko'
+            yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kaniko
+spec:
+  containers:
+  - name: kaniko
+    image: gcr.io/kaniko-project/executor:debug
+    command:
+    - sleep
+    args:
+    - 99999
+    volumeMounts:
+    - name: workspace
+      mountPath: /workspace
+  - name: git
+    image: alpine/git:latest
+    command:
+    - sleep
+    args:
+    - 99999
+  - name: aws-cli
+    image: amazon/aws-cli:latest
+    command:
+    - sleep
+    args:
+    - 99999
+  - name: trivy
+    image: aquasec/trivy:latest
+    command:
+    - sleep
+    args:
+    - 99999
+  volumes:
+  - name: workspace
+    emptyDir: {}
+"""
+        }
+    }
+
+    environment {
+        AWS_REGION = 'us-west-2'
+        ECR_REGISTRY = credentials('ecr-registry-url')
+        ECR_REPOSITORY = 'django-app-final-project'
+        GIT_CREDENTIALS = credentials('github-token')
+        GITHUB_REPO = 'my-microservice-project'
+        GITHUB_USERNAME = credentials('github-username')
+        HELM_CHART_REPO = "https://github.com/${GITHUB_USERNAME}/${GITHUB_REPO}.git"
+        HELM_CHART_PATH = 'charts/django-app'
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                container('git') {
+                    sh '''
+                        git clone ${HELM_CHART_REPO} /workspace/repo
+                        cd /workspace/repo
+                        git checkout final-project || git checkout -b final-project
+                    '''
+                }
+            }
+        }
+
+        stage('Build Docker Image with Kaniko') {
+            steps {
+                container('kaniko') {
+                    sh '''
+                        /kaniko/executor \
+                            --context /workspace/repo/Django \
+                            --dockerfile /workspace/repo/Django/Dockerfile \
+                            --destination ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} \
+                            --destination ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest \
+                            --cache=true \
+                            --cache-ttl=24h \
+                            --no-push
+                    '''
+                }
+            }
+        }
+
+        stage('Security Scan with Trivy') {
+            steps {
+                container('trivy') {
+                    sh '''
+                        echo "🔍 Scanning Docker image for vulnerabilities..."
+                        
+                        # Scan the image tarball
+                        trivy image --severity HIGH,CRITICAL \
+                            --exit-code 0 \
+                            --format table \
+                            ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} || true
+                        
+                        # Generate JSON report
+                        trivy image --severity HIGH,CRITICAL \
+                            --format json \
+                            --output /workspace/trivy-report.json \
+                            ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} || true
+                        
+                        echo "✅ Security scan completed"
+                    '''
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                container('kaniko') {
+                    sh '''
+                        echo "🚀 Pushing image to ECR..."
+                        /kaniko/executor \
+                            --context /workspace/repo/Django \
+                            --dockerfile /workspace/repo/Django/Dockerfile \
+                            --destination ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} \
+                            --destination ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest \
+                            --cache=true \
+                            --cache-ttl=24h
+                    '''
+                }
+            }
+        }
+
+        stage('Update Helm Chart') {
+            steps {
+                container('git') {
+                    sh '''
+                        cd /workspace/repo
+                        
+                        # Update image tag in values.yaml
+                        sed -i "s|tag:.*|tag: \\"${IMAGE_TAG}\\"|g" ${HELM_CHART_PATH}/values.yaml
+                        
+                        # Configure git
+                        git config user.name "Jenkins CI"
+                        git config user.email "jenkins@ci.local"
+                        
+                        # Commit and push changes
+                        git add ${HELM_CHART_PATH}/values.yaml
+                        git commit -m "chore: update image tag to ${IMAGE_TAG}" || echo "No changes to commit"
+                        
+                        # Push to GitHub using credentials
+                        git push https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@github.com/${GITHUB_USERNAME}/${GITHUB_REPO}.git final-project
+                    '''
+                }
+            }
+        }
+
+        stage('Verify Argo CD Sync') {
+            steps {
+                container('aws-cli') {
+                    sh '''
+                        echo "Image pushed: ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
+                        echo "Helm chart updated in Git. Argo CD will auto-sync the changes."
+                        echo "Check Argo CD dashboard for deployment status."
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Pipeline completed successfully!"
+            echo "Image: ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
+        }
+        failure {
+            echo "❌ Pipeline failed. Check logs for details."
+        }
+    }
+}

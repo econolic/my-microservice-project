@@ -1,0 +1,98 @@
+repos:
+  # Terraform security scanning
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.88.4
+    hooks:
+      - id: terraform_fmt
+        name: Terraform format
+        description: Rewrites all Terraform files to canonical format
+        
+      - id: terraform_validate
+        name: Terraform validate
+        description: Validates all Terraform files
+        args:
+          - --args=-no-color
+          
+      - id: terraform_tfsec
+        name: Terraform security scan (tfsec)
+        description: Static analysis of Terraform templates
+        args:
+          - --args=--minimum-severity=MEDIUM
+          
+      - id: terraform_docs
+        name: Terraform docs
+        description: Inserts documentation for Terraform modules
+        args:
+          - --args=--lockfile=false
+
+  # Secrets detection
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.2
+    hooks:
+      - id: gitleaks
+        name: Detect secrets
+        description: Detect hardcoded secrets
+
+  # Python code quality
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        name: Trim trailing whitespace
+        
+      - id: end-of-file-fixer
+        name: Fix end of files
+        
+      - id: check-yaml
+        name: Check YAML syntax
+        args: ['--unsafe']
+        
+      - id: check-added-large-files
+        name: Check for large files
+        args: ['--maxkb=500']
+        
+      - id: check-merge-conflict
+        name: Check for merge conflicts
+        
+      - id: detect-private-key
+        name: Detect private keys
+
+  # Python formatting
+  - repo: https://github.com/psf/black
+    rev: 24.2.0
+    hooks:
+      - id: black
+        name: Black Python formatter
+        language_version: python3.11
+
+  # Python linting
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        name: Flake8 linter
+        args: ['--max-line-length=88', '--extend-ignore=E203,W503']
+
+  # Docker linting
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.12.0
+    hooks:
+      - id: hadolint-docker
+        name: Hadolint Dockerfile linter
+        args: ['--ignore', 'DL3008', '--ignore', 'DL3009']
+
+  # YAML linting
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        name: YAML linter
+        args: ['-d', '{extends: default, rules: {line-length: {max: 120}}}']
+
+  # Markdown linting
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.39.0
+    hooks:
+      - id: markdownlint
+        name: Markdown linter
+        args: ['--fix']
