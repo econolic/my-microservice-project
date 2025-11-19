@@ -142,6 +142,24 @@ data "aws_iam_policy_document" "ebs_csi_driver" {
   }
 }
 
+# OIDC Provider for EKS
+data "tls_certificate" "eks" {
+  url = aws_eks_cluster.main.identity[0].oidc[0].issuer
+}
+
+resource "aws_iam_openid_connect_provider" "eks" {
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
+  url             = aws_eks_cluster.main.identity[0].oidc[0].issuer
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${var.cluster_name}-eks-oidc"
+    }
+  )
+}
+
 # IAM role for EBS CSI Driver
 resource "aws_iam_role" "ebs_csi_driver" {
   name = "${var.cluster_name}-ebs-csi-driver-role"
@@ -152,7 +170,7 @@ resource "aws_iam_role" "ebs_csi_driver" {
       {
         Effect = "Allow"
         Principal = {
-          Federated = aws_eks_cluster.main.identity[0].oidc[0].issuer
+          Federated = aws_iam_openid_connect_provider.eks.arn
         }
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {

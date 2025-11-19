@@ -18,7 +18,7 @@ resource "helm_release" "kube_prometheus_stack" {
   version    = var.chart_version
   namespace  = kubernetes_namespace.monitoring.metadata[0].name
 
-  timeout = 600
+  timeout = 1200
 
   values = [
     templatefile("${path.module}/values.yaml", {

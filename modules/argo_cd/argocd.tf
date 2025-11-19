@@ -44,7 +44,7 @@ resource "helm_release" "argocd" {
     })
   ]
 
-  timeout = 600
+  timeout = 1200
 
   depends_on = [
     kubernetes_namespace.argocd

@@ -65,7 +65,7 @@ variable "cluster_name" {
 variable "cluster_version" {
   description = "Kubernetes version to use for the EKS cluster"
   type        = string
-  default     = "1.28"
+  default     = "1.29"
 }
 
 variable "node_group_name" {
@@ -302,7 +302,7 @@ variable "rds_multi_az" {
 variable "rds_backup_retention_period" {
   description = "Number of days to retain backups"
   type        = number
-  default     = 7
+  default     = 1
 }
 
 variable "rds_backup_window" {

@@ -1,9 +1,3 @@
-# VPC Outputs
-output "vpc_id" {
-  description = "VPC ID"
-  value       = module.vpc.vpc_id
-}
-
 # Secrets Manager Outputs
 output "github_token_secret_name" {
   description = "Name of GitHub token secret in Secrets Manager"

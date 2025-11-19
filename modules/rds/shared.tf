@@ -71,16 +71,18 @@ resource "aws_db_parameter_group" "this" {
   dynamic "parameter" {
     for_each = local.default_parameters
     content {
-      name  = parameter.value.name
-      value = parameter.value.value
+      name         = parameter.value.name
+      value        = parameter.value.value
+      apply_method = lookup(parameter.value, "apply_method", "pending-reboot")
     }
   }
 
   dynamic "parameter" {
     for_each = var.db_parameters
     content {
-      name  = parameter.value.name
-      value = parameter.value.value
+      name         = parameter.value.name
+      value        = parameter.value.value
+      apply_method = lookup(parameter.value, "apply_method", "immediate")
     }
   }
 
@@ -106,16 +108,18 @@ resource "aws_rds_cluster_parameter_group" "this" {
   dynamic "parameter" {
     for_each = local.default_parameters
     content {
-      name  = parameter.value.name
-      value = parameter.value.value
+      name         = parameter.value.name
+      value        = parameter.value.value
+      apply_method = lookup(parameter.value, "apply_method", "pending-reboot")
     }
   }
 
   dynamic "parameter" {
     for_each = var.db_parameters
     content {
-      name  = parameter.value.name
-      value = parameter.value.value
+      name         = parameter.value.name
+      value        = parameter.value.value
+      apply_method = lookup(parameter.value, "apply_method", "immediate")
     }
   }
 
@@ -147,29 +151,35 @@ locals {
   # Default parameters based on engine type
   default_parameters = var.engine == "postgres" || var.engine == "aurora-postgresql" ? [
     {
-      name  = "max_connections"
-      value = "100"
+      name         = "max_connections"
+      value        = "100"
+      apply_method = "pending-reboot"
     },
     {
-      name  = "shared_buffers"
-      value = "{DBInstanceClassMemory/32768}"
+      name         = "shared_buffers"
+      value        = "{DBInstanceClassMemory/32768}"
+      apply_method = "pending-reboot"
     },
     {
-      name  = "log_statement"
-      value = "all"
+      name         = "log_statement"
+      value        = "all"
+      apply_method = "immediate"
     }
   ] : var.engine == "mysql" || var.engine == "aurora-mysql" ? [
     {
-      name  = "max_connections"
-      value = "100"
+      name         = "max_connections"
+      value        = "100"
+      apply_method = "pending-reboot"
     },
     {
-      name  = "slow_query_log"
-      value = "1"
+      name         = "slow_query_log"
+      value        = "1"
+      apply_method = "immediate"
     },
     {
-      name  = "long_query_time"
-      value = "2"
+      name         = "long_query_time"
+      value        = "2"
+      apply_method = "immediate"
     }
   ] : []
 }

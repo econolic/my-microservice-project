@@ -7,11 +7,11 @@ prometheus:
     # Resource limits for Prometheus server
     resources:
       requests:
-        cpu: "200m"
-        memory: "512Mi"
+        cpu: "100m"
+        memory: "256Mi"
       limits:
-        cpu: "500m"
-        memory: "1Gi"
+        cpu: "300m"
+        memory: "512Mi"
     
     # Storage configuration
     storageSpec:
@@ -59,15 +59,15 @@ grafana:
   defaultDashboardsEnabled: true
   
   # Datasources
-  datasources:
-    datasources.yaml:
-      apiVersion: 1
-      datasources:
-        - name: Prometheus
-          type: prometheus
-          url: http://kube-prometheus-stack-prometheus:9090
-          access: proxy
-          isDefault: true
+  # datasources:
+  #   datasources.yaml:
+  #     apiVersion: 1
+  #     datasources:
+  #       - name: Prometheus
+  #         type: prometheus
+  #         url: http://kube-prometheus-stack-prometheus:9090
+  #         access: proxy
+  #         isDefault: true
 
 # AlertManager configuration
 alertmanager:
@@ -77,11 +77,11 @@ alertmanager:
     # Resource limits for AlertManager
     resources:
       requests:
-        cpu: "50m"
-        memory: "128Mi"
+        cpu: "25m"
+        memory: "64Mi"
       limits:
-        cpu: "200m"
-        memory: "256Mi"
+        cpu: "100m"
+        memory: "128Mi"
     
     # Storage
     storage:
