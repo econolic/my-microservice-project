@@ -112,7 +112,7 @@ variable "allowed_security_group_ids" {
 variable "backup_retention_period" {
   description = "Number of days to retain backups"
   type        = number
-  default     = 1  # Free tier limit
+  default     = 1 # Free tier limit
 }
 
 variable "backup_window" {

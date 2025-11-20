@@ -14,7 +14,7 @@ variable "service_type" {
   description = "Kubernetes service type for Grafana and Prometheus"
   type        = string
   default     = "LoadBalancer"
-  
+
   validation {
     condition     = contains(["ClusterIP", "NodePort", "LoadBalancer"], var.service_type)
     error_message = "Service type must be ClusterIP, NodePort, or LoadBalancer."

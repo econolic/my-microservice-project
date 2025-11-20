@@ -3,7 +3,7 @@
 
 terraform {
   required_version = ">= 1.0"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -28,7 +28,7 @@ provider "aws" {
 provider "kubernetes" {
   host                   = module.eks.cluster_endpoint
   cluster_ca_certificate = base64decode(module.eks.cluster_ca_certificate)
-  
+
   exec {
     api_version = "client.authentication.k8s.io/v1beta1"
     command     = "aws"
@@ -48,7 +48,7 @@ provider "helm" {
   kubernetes {
     host                   = module.eks.cluster_endpoint
     cluster_ca_certificate = base64decode(module.eks.cluster_ca_certificate)
-    
+
     exec {
       api_version = "client.authentication.k8s.io/v1beta1"
       command     = "aws"
@@ -72,11 +72,11 @@ provider "helm" {
 module "secrets" {
   source = "./modules/secrets"
 
-  project_name            = "final-project"
-  github_token            = var.github_token
-  jenkins_admin_password  = var.jenkins_admin_password
-  rds_master_password     = var.rds_master_password
-  tags                    = var.tags
+  project_name           = "final-project"
+  github_token           = var.github_token
+  jenkins_admin_password = var.jenkins_admin_password
+  rds_master_password    = var.rds_master_password
+  tags                   = var.tags
 }
 
 # S3 Backend for Terraform State
@@ -114,26 +114,26 @@ module "ecr" {
 module "eks" {
   source = "./modules/eks"
 
-  cluster_name        = var.cluster_name
-  cluster_version     = var.cluster_version
-  vpc_id              = module.vpc.vpc_id
-  subnet_ids          = concat(module.vpc.public_subnet_ids, module.vpc.private_subnet_ids)
-  node_group_name     = var.node_group_name
-  node_instance_types = var.node_instance_types
-  node_min_size       = var.node_min_size
-  node_desired_size   = var.node_desired_size
-  node_max_size       = var.node_max_size
+  cluster_name           = var.cluster_name
+  cluster_version        = var.cluster_version
+  vpc_id                 = module.vpc.vpc_id
+  subnet_ids             = concat(module.vpc.public_subnet_ids, module.vpc.private_subnet_ids)
+  node_group_name        = var.node_group_name
+  node_instance_types    = var.node_instance_types
+  node_min_size          = var.node_min_size
+  node_desired_size      = var.node_desired_size
+  node_max_size          = var.node_max_size
   ebs_csi_driver_version = var.ebs_csi_driver_version
-  tags                = var.tags
+  tags                   = var.tags
 }
 
 # RDS PostgreSQL Database
 module "rds" {
   source = "./modules/rds"
 
-  identifier   = var.rds_identifier
-  use_aurora   = var.rds_use_aurora
-  engine       = var.rds_engine
+  identifier     = var.rds_identifier
+  use_aurora     = var.rds_use_aurora
+  engine         = var.rds_engine
   engine_version = var.rds_engine_version
   instance_class = var.rds_instance_class
 
@@ -145,16 +145,16 @@ module "rds" {
   # Database configuration
   database_name   = var.rds_database_name
   master_username = var.rds_master_username
-  master_password = var.rds_master_password  # Буде збережено в Secrets Manager через модуль secrets
+  master_password = var.rds_master_password # Буде збережено в Secrets Manager через модуль secrets
   port            = var.rds_port
 
   # Network configuration
-  vpc_id                       = module.vpc.vpc_id
-  subnet_ids                   = module.vpc.private_subnet_ids
-  allowed_cidr_blocks          = var.rds_allowed_cidr_blocks
-  allowed_security_group_ids   = var.rds_allowed_security_group_ids
-  publicly_accessible          = var.rds_publicly_accessible
-  multi_az                     = var.rds_multi_az
+  vpc_id                     = module.vpc.vpc_id
+  subnet_ids                 = module.vpc.private_subnet_ids
+  allowed_cidr_blocks        = var.rds_allowed_cidr_blocks
+  allowed_security_group_ids = var.rds_allowed_security_group_ids
+  publicly_accessible        = var.rds_publicly_accessible
+  multi_az                   = var.rds_multi_az
 
   # Backup configuration
   backup_retention_period = var.rds_backup_retention_period
@@ -164,12 +164,12 @@ module "rds" {
   deletion_protection     = var.rds_deletion_protection
 
   # Monitoring
-  performance_insights_enabled = var.rds_performance_insights_enabled
+  performance_insights_enabled    = var.rds_performance_insights_enabled
   enabled_cloudwatch_logs_exports = var.rds_enabled_cloudwatch_logs_exports
 
   # Aurora-specific (only used when use_aurora = true)
-  aurora_cluster_instances = var.rds_aurora_cluster_instances
-  aurora_autoscaling_enabled = var.rds_aurora_autoscaling_enabled
+  aurora_cluster_instances        = var.rds_aurora_cluster_instances
+  aurora_autoscaling_enabled      = var.rds_aurora_autoscaling_enabled
   aurora_autoscaling_min_capacity = var.rds_aurora_autoscaling_min_capacity
   aurora_autoscaling_max_capacity = var.rds_aurora_autoscaling_max_capacity
 

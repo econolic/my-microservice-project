@@ -7,6 +7,11 @@ on:
     branches: [ main, final-project ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
 jobs:
   terraform-security:
     name: Terraform Security Scan (tfsec)
@@ -21,10 +26,10 @@ jobs:
       with:
         soft_fail: false
         format: sarif
-        additional_args: --minimum-severity MEDIUM
+        additional_args: --minimum-severity MEDIUM --out tfsec.sarif
         
     - name: Upload tfsec results to GitHub Security
-      uses: github/codeql-action/upload-sarif@v3
+      uses: github/codeql-action/upload-sarif@v4
       if: always()
       with:
         sarif_file: tfsec.sarif
@@ -47,7 +52,7 @@ jobs:
         severity: 'CRITICAL,HIGH,MEDIUM'
         
     - name: Upload Trivy results to GitHub Security
-      uses: github/codeql-action/upload-sarif@v3
+      uses: github/codeql-action/upload-sarif@v4
       if: always()
       with:
         sarif_file: trivy-dockerfile.sarif

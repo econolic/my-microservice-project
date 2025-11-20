@@ -142,7 +142,7 @@ locals {
     contains(["aurora-postgresql", "aurora-mysql"], var.engine) ? (
       var.engine == "aurora-postgresql" ? "aurora-postgresql${split(".", var.engine_version)[0]}" : "aurora-mysql${split(".", var.engine_version)[0]}"
     ) : var.engine
-  ) : (
+    ) : (
     var.engine == "postgres" ? "postgres${split(".", var.engine_version)[0]}" : (
       var.engine == "mysql" ? "mysql${split(".", var.engine_version)[0]}" : var.engine
     )
@@ -165,7 +165,7 @@ locals {
       value        = "all"
       apply_method = "immediate"
     }
-  ] : var.engine == "mysql" || var.engine == "aurora-mysql" ? [
+    ] : var.engine == "mysql" || var.engine == "aurora-mysql" ? [
     {
       name         = "max_connections"
       value        = "100"

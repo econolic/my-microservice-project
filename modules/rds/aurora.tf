@@ -2,13 +2,13 @@
 resource "aws_rds_cluster" "this" {
   count = var.use_aurora ? 1 : 0
 
-  cluster_identifier     = var.identifier
-  engine                 = var.engine
-  engine_version         = var.engine_version
-  database_name          = var.database_name
-  master_username        = var.master_username
-  master_password        = var.master_password
-  port                   = var.port
+  cluster_identifier = var.identifier
+  engine             = var.engine
+  engine_version     = var.engine_version
+  database_name      = var.database_name
+  master_username    = var.master_username
+  master_password    = var.master_password
+  port               = var.port
 
   # Network configuration
   db_subnet_group_name   = aws_db_subnet_group.this.name
@@ -22,7 +22,7 @@ resource "aws_rds_cluster" "this" {
   preferred_backup_window      = var.backup_window
   preferred_maintenance_window = var.maintenance_window
   skip_final_snapshot          = var.skip_final_snapshot
-  final_snapshot_identifier    = var.skip_final_snapshot ? null : (
+  final_snapshot_identifier = var.skip_final_snapshot ? null : (
     var.final_snapshot_identifier != null ? var.final_snapshot_identifier : "${var.identifier}-final-snapshot-${formatdate("YYYY-MM-DD-hhmm", timestamp())}"
   )
 
