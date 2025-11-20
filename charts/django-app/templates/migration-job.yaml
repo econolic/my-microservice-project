@@ -5,10 +5,6 @@ metadata:
   labels:
     {{- include "django-app.labels" . | nindent 4 }}
     app.kubernetes.io/component: migration
-  annotations:
-    "helm.sh/hook": pre-upgrade,pre-install
-    "helm.sh/hook-weight": "-5"
-    "helm.sh/hook-delete-policy": before-hook-creation
 spec:
   backoffLimit: 3
   ttlSecondsAfterFinished: 300
