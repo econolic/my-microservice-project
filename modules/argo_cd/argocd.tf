@@ -69,7 +69,7 @@ resource "helm_release" "argocd_apps" {
 
   set {
     name  = "github.targetRevision"
-    value = "main"
+    value = "final-project"
   }
 
   set {
