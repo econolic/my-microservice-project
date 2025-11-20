@@ -75,7 +75,7 @@ django:
     name: djangodb
     user: dbadmin
     password: SecureDbPassword123!  # Match terraform.tfvars rds_master_password
-    host: "REPLACE_WITH_RDS_ENDPOINT"  # Update after terraform apply
+    host: "final-project-postgres.cfu6q0c821v6.us-west-2.rds.amazonaws.com"  # Update after terraform apply
     port: "5432"
   
   # Django settings
