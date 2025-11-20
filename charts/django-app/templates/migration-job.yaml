@@ -22,7 +22,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "django-app.serviceAccountName" . }}
+      # serviceAccountName: {{ include "django-app.serviceAccountName" . }}
       restartPolicy: Never
       containers:
       - name: django-migration
